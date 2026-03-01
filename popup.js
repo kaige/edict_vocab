@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Handle login/register
   authSubmitBtn.addEventListener('click', function() {
+    console.log('Auth button clicked, mode:', isLoginMode ? 'login' : 'register');
     const email = authEmail.value.trim();
     const password = authPassword.value;
 
@@ -108,15 +109,19 @@ document.addEventListener('DOMContentLoaded', function() {
     authSubmitBtn.disabled = true;
     authSubmitBtn.textContent = isLoginMode ? '登录中...' : '注册中...';
 
+    console.log('Calling auth function, email:', email);
+
     if (isLoginMode) {
       signIn(email, password)
-        .then(() => {
+        .then((result) => {
+          console.log('Login success:', result);
           authModal.style.display = 'none';
           authEmail.value = '';
           authPassword.value = '';
           showSyncStatus('登录成功！', 2000);
         })
         .catch(err => {
+          console.error('Login error:', err);
           handleError(err);
         })
         .finally(() => {
@@ -125,13 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } else {
       signUp(email, password)
-        .then(() => {
+        .then((result) => {
+          console.log('Register success:', result);
           authModal.style.display = 'none';
           authEmail.value = '';
           authPassword.value = '';
           showSyncStatus('注册成功！', 2000);
         })
         .catch(err => {
+          console.error('Register error:', err);
           handleError(err);
         })
         .finally(() => {

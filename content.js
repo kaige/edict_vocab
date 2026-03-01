@@ -211,7 +211,7 @@
   }
 
   // 尝试补充单词的详细数据（带重试）
-  function enrichWordData(word, maxRetries = 20, delay = 500) {
+  function enrichWordData(word, maxRetries = 40, delay = 500) {
     let retries = 0;
 
     function tryEnrich() {
@@ -227,9 +227,15 @@
       const wordMatches = data.word && data.word.toLowerCase() === word.toLowerCase();
       const hasData = data.definition || data.phonetic;
 
+      // 检查URL是否已经更新为目标单词
+      const urlWord = getWordFromUrl();
+      const urlUpdated = urlWord && urlWord.toLowerCase() === word.toLowerCase();
+
       console.log('iciba生词本: 词汇数据获取尝试', word, {
         extractedWord: data.word,
+        urlWord: urlWord,
         wordMatches: wordMatches,
+        urlUpdated: urlUpdated,
         hasDefinition: !!data.definition,
         hasPhonetic: !!data.phonetic,
         retry: retries
@@ -255,7 +261,21 @@
         retries++;
         setTimeout(tryEnrich, delay);
       } else {
-        console.log('iciba生词本: 达到最大重试次数，无法获取详细数据', word);
+        // 最后的尝试：即使单词不完全匹配，如果URL已更新，尝试使用提取到的数据
+        if (urlUpdated && hasData) {
+          chrome.storage.local.get({ words: [] }, function(result) {
+            const words = result.words || [];
+            const index = words.findIndex(w => w.word.toLowerCase() === word.toLowerCase());
+            if (index !== -1) {
+              words[index] = { ...words[index], ...data, word: word }; // 确保单词名正确
+              chrome.storage.local.set({ words: words }, function() {
+                console.log('iciba生词本: 已更新单词详细数据 (URL匹配)', word, data.definition, data.phonetic);
+              });
+            }
+          });
+        } else {
+          console.log('iciba生词本: 达到最大重试次数，无法获取详细数据', word);
+        }
       }
     }
 
