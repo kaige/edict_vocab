@@ -250,7 +250,7 @@
       const wordMatches = data.word && data.word.toLowerCase() === word.toLowerCase();
       const hasData = data.definition || data.phonetic;
 
-      // 检查URL是否已经更新为目标单词
+      // 检查URL是否已经更新
       const urlWord = getWordFromUrl();
       const urlUpdated = urlWord && urlWord.toLowerCase() === word.toLowerCase();
 
@@ -266,21 +266,7 @@
 
       if (wordMatches && hasData) {
         // 单词匹配且有数据，更新存储
-        chrome.storage.local.get({ words: [] }, function(result) {
-          if (!isActive) return; // 再次检查
-          const words = result.words || [];
-          const index = words.findIndex(w => w.word.toLowerCase() === word.toLowerCase());
-          if (index !== -1) {
-            words[index] = { ...words[index], ...data };
-            chrome.storage.local.set({ words: words }, function() {
-              console.log('iciba生词本: 已更新单词详细数据', word, data.definition, data.phonetic);
-            }).catch(err => {
-              console.error('iciba生词本: 更新失败', err);
-            });
-          }
-        }).catch(err => {
-          console.error('iciba生词本: 读取失败', err);
-        });
+        updateWordWithData(word, data);
         return;
       }
 
@@ -289,27 +275,42 @@
         retries++;
         setTimeout(tryEnrich, delay);
       } else {
-        // 最后的尝试：即使单词不完全匹配，如果URL已更新，尝试使用提取到的数据
-        if (urlUpdated && hasData) {
-          chrome.storage.local.get({ words: [] }, function(result) {
-            if (!isActive) return;
-            const words = result.words || [];
-            const index = words.findIndex(w => w.word.toLowerCase() === word.toLowerCase());
-            if (index !== -1) {
-              words[index] = { ...words[index], ...data, word: word }; // 确保单词名正确
-              chrome.storage.local.set({ words: words }, function() {
-                console.log('iciba生词本: 已更新单词详细数据 (URL匹配)', word, data.definition, data.phonetic);
-              }).catch(err => {
-                console.error('iciba生词本: 更新失败', err);
-              });
-            }
-          }).catch(err => {
-            console.error('iciba生词本: 读取失败', err);
-          });
-        } else {
-          console.log('iciba生词本: 达到最大重试次数，无法获取详细数据', word);
+        // 最后的尝试：即使单词不完全匹配，如果有数据，尝试使用提取到的数据
+        if (hasData && data.word) {
+          // iciba可能重定向到相似词（如 hamburger -> hammer）
+          // 检查是否包含目标词或目标词包含提取词
+          const extractedLower = data.word.toLowerCase();
+          const targetLower = word.toLowerCase();
+          const isRedirect = extractedLower.includes(targetLower) || targetLower.includes(extractedLower);
+
+          if (isRedirect) {
+            console.log('iciba生词本: 检测到重定向，使用提取的数据', data.word, '->', word);
+            updateWordWithData(word, data);
+            return;
+          }
         }
+        console.log('iciba生词本: 达到最大重试次数，无法获取详细数据', word);
       }
+    }
+
+    function updateWordWithData(targetWord, data) {
+      chrome.storage.local.get({ words: [] }, function(result) {
+        if (!isActive) return;
+        const words = result.words || [];
+        const index = words.findIndex(w => w.word.toLowerCase() === targetWord.toLowerCase());
+        if (index !== -1) {
+          // 合并数据，但确保单词名是用户输入的词
+          words[index] = {
+            ...words[index],
+            phonetic: data.phonetic,
+            definition: data.definition,
+            examples: data.examples || []
+          };
+          chrome.storage.local.set({ words: words }, function() {
+            console.log('iciba生词本: 已更新单词详细数据', targetWord, data.definition, data.phonetic);
+          });
+        }
+      });
     }
 
     tryEnrich();
