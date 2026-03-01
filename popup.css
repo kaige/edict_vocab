@@ -39,7 +39,7 @@ header h1 {
   border-radius: 12px;
 }
 
-/* User Bar */
+/* Sync Bar */
 .user-bar {
   background: white;
   border-radius: 8px;
@@ -54,22 +54,10 @@ header h1 {
   gap: 12px;
 }
 
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .user-name {
   flex: 1;
   font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 150px;
+  color: #666;
 }
 
 .btn-sync {
@@ -87,51 +75,6 @@ header h1 {
   background: #45a049;
 }
 
-.btn-text {
-  padding: 6px 12px;
-  background: transparent;
-  color: #666;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.btn-text:hover {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.sign-in-prompt {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.sign-in-prompt span {
-  font-size: 13px;
-  color: #666;
-  flex: 1;
-}
-
-.btn-primary {
-  padding: 8px 16px;
-  background: #4285f4;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  white-space: nowrap;
-  transition: background 0.2s;
-}
-
-.btn-primary:hover {
-  background: #3367d6;
-}
-
 /* Sync Status */
 .sync-status {
   position: fixed;
@@ -144,104 +87,6 @@ header h1 {
   padding: 8px 16px;
   text-align: center;
   display: none;
-}
-
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  width: 320px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.modal-header h2 {
-  font-size: 18px;
-  color: #333;
-}
-
-.close-btn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: #f0f0f0;
-  color: #666;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  transition: all 0.2s;
-}
-
-.close-btn:hover {
-  background: #e0e0e0;
-  color: #333;
-}
-
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.auth-input {
-  padding: 10px 14px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.auth-input:focus {
-  border-color: #4285f4;
-}
-
-.auth-error {
-  color: #f44336;
-  font-size: 12px;
-  min-height: 16px;
-  margin: 0;
-}
-
-.btn-full {
-  width: 100%;
-  padding: 10px;
-}
-
-.auth-switch {
-  text-align: center;
-  font-size: 13px;
-  color: #666;
-}
-
-.auth-switch a {
-  color: #4285f4;
-  text-decoration: none;
-}
-
-.auth-switch a:hover {
-  text-decoration: underline;
 }
 
 .toolbar {
@@ -398,4 +243,3 @@ header h1 {
 .word-list::-webkit-scrollbar-thumb:hover {
   background: #aaa;
 }
-

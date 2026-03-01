@@ -18,6 +18,7 @@ dist/
 build/
 *.crx
 *.pem
+*.zip
 
 # Debug logs
 *.log
