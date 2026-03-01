@@ -1,6 +1,5 @@
 // Firebase Service - Handles authentication and cloud sync
 
-// Firebase will be initialized from CDN
 let db = null;
 let auth = null;
 
@@ -12,9 +11,16 @@ function initFirebase() {
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
         auth = firebase.auth();
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         resolve();
       } catch (e) {
-        reject(e);
+        if (e.code === 'app/duplicate-app') {
+          db = firebase.database();
+          auth = firebase.auth();
+          resolve();
+        } else {
+          reject(e);
+        }
       }
     } else {
       reject(new Error('Firebase not loaded'));
@@ -27,10 +33,14 @@ function getCurrentUser() {
   return auth ? auth.currentUser : null;
 }
 
-// Sign in with Google
-function signInWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  return auth.signInWithPopup(provider);
+// Sign up with email/password
+function signUp(email, password) {
+  return auth.createUserWithEmailAndPassword(email, password);
+}
+
+// Sign in with email/password
+function signIn(email, password) {
+  return auth.signInWithEmailAndPassword(email, password);
 }
 
 // Sign out
@@ -45,18 +55,21 @@ function onAuthStateChanged(callback) {
   }
 }
 
-// Save words to Firebase (merge with existing)
+// Send password reset email
+function sendPasswordReset(email) {
+  return auth.sendPasswordResetEmail(email);
+}
+
+// Save words to Firebase
 function saveWordsToFirebase(words) {
   const user = getCurrentUser();
   if (!user) return Promise.reject(new Error('Not authenticated'));
 
   const wordsRef = db.ref('users/' + user.uid + '/words');
 
-  // Get existing words first
   return wordsRef.once('value').then(snapshot => {
-    const existingWords = snapshot.val() || {};
+    const existingWords = snapshot.val() || [];
 
-    // Merge new words with existing (use word as key for deduplication)
     const wordMap = {};
     for (const word of existingWords) {
       if (word) {
@@ -69,7 +82,6 @@ function saveWordsToFirebase(words) {
       }
     }
 
-    // Convert back to array and save
     const mergedWords = Object.values(wordMap);
     return wordsRef.set(mergedWords);
   });
