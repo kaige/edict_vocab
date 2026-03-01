@@ -35,12 +35,7 @@
     "48": "icon.png",
     "128": "icon.png"
   },
-  "sandbox": {
-    "pages": [
-      "popup.html"
-    ],
-    "content_security_policy": {
-      "popup": "sandbox allow-scripts allow-popups; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self' blob:; child-src 'self'; object-src 'self' blob:; script-src-elem 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline';"
-    }
+  "content_security_policy": {
+    "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://www.gstatic.com https://apis.google.com; connect-src 'self' https://www.gstatic.com https://apis.google.com https://firebaseio.com https://firebaseapp.com https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com; worker-src 'self' blob:; child-src 'self'; object-src 'self' blob:; style-src 'self' 'unsafe-inline';"
   }
 }
