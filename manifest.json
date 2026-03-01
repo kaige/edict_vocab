@@ -8,7 +8,12 @@
     "activeTab"
   ],
   "host_permissions": [
-    "*://*.iciba.com/*"
+    "*://*.iciba.com/*",
+    "https://*.firebaseio.com/*",
+    "https://*.firebaseapp.com/*",
+    "https://*.googleapis.com/*",
+    "https://accounts.google.com/*",
+    "https://www.gstatic.com/*"
   ],
   "content_scripts": [
     {
@@ -29,5 +34,8 @@
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://www.gstatic.com https://apis.google.com; object-src 'self'"
   }
 }

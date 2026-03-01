@@ -13,6 +13,20 @@
       <span id="wordCount" class="word-count">0 个单词</span>
     </header>
 
+    <!-- User info bar -->
+    <div id="userBar" class="user-bar">
+      <div id="userInfo" class="user-info" style="display: none;">
+        <img id="userAvatar" class="user-avatar" src="" alt="">
+        <span id="userName" class="user-name"></span>
+        <button id="syncBtn" class="btn-sync" title="同步到云端">☁️</button>
+        <button id="signOutBtn" class="btn-text">退出</button>
+      </div>
+      <div id="signInPrompt" class="sign-in-prompt">
+        <span>登录后可同步生词到云端</span>
+        <button id="signInBtn" class="btn-primary">🔗 Google 登录</button>
+      </div>
+    </div>
+
     <div class="toolbar">
       <input type="text" id="searchInput" class="search-input" placeholder="搜索单词...">
       <button id="exportBtn" class="btn btn-secondary">导出</button>
@@ -22,8 +36,17 @@
     <div id="wordList" class="word-list">
       <div class="empty-state">暂无生词，去查几个单词吧！</div>
     </div>
+
+    <!-- Sync status indicator -->
+    <div id="syncStatus" class="sync-status"></div>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="firebase-config.js"></script>
+  <script src="firebase-app.js"></script>
+  <script src="firebase-auth.js"></script>
+  <script src="firebase-database.js"></script>
+  <script src="firebase.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

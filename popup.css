@@ -39,6 +39,113 @@ header h1 {
   border-radius: 12px;
 }
 
+/* User Bar */
+.user-bar {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.btn-sync {
+  padding: 6px 12px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.btn-sync:hover {
+  background: #45a049;
+}
+
+.btn-text {
+  padding: 6px 12px;
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.btn-text:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.sign-in-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sign-in-prompt span {
+  font-size: 13px;
+  color: #666;
+  flex: 1;
+}
+
+.btn-primary {
+  padding: 8px 16px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #3367d6;
+}
+
+/* Sync Status */
+.sync-status {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #333;
+  color: white;
+  font-size: 12px;
+  padding: 8px 16px;
+  text-align: center;
+  display: none;
+}
+
 .toolbar {
   display: flex;
   gap: 8px;
@@ -193,3 +300,4 @@ header h1 {
 .word-list::-webkit-scrollbar-thumb:hover {
   background: #aaa;
 }
+
