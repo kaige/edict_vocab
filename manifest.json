@@ -8,12 +8,7 @@
     "activeTab"
   ],
   "host_permissions": [
-    "*://*.iciba.com/*",
-    "https://*.firebaseio.com/*",
-    "https://*.firebaseapp.com/*",
-    "https://*.googleapis.com/*",
-    "https://accounts.google.com/*",
-    "https://www.gstatic.com/*"
+    "*://*.iciba.com/*"
   ],
   "content_scripts": [
     {

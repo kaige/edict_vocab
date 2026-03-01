@@ -171,6 +171,12 @@
   function saveWord(word) {
     if (!word || word.length < 2) return;
 
+    // 检查chrome.storage是否可用
+    if (!chrome.storage || !chrome.storage.local) {
+      console.error('iciba生词本: chrome.storage 不可用，请刷新页面');
+      return;
+    }
+
     const wordData = {
       word: word,
       phonetic: '',
@@ -179,8 +185,17 @@
       timestamp: Date.now()
     };
 
+    console.log('iciba生词本: 正在保存单词', word);
+
     chrome.storage.local.get({ words: [] }, function(result) {
+      // 检查是否出现错误
+      if (chrome.runtime.lastError) {
+        console.error('iciba生词本: 读取存储出错', chrome.runtime.lastError);
+        return;
+      }
+
       const words = result.words || [];
+      console.log('iciba生词本: 当前已有', words.length, '个单词');
 
       // 检查是否已存在
       const exists = words.some(w => w.word.toLowerCase() === word.toLowerCase());
@@ -198,13 +213,28 @@
         words.pop();
       }
 
+      // 同时保存到本地和云端
       chrome.storage.local.set({ words: words }, function() {
-        console.log('iciba生词本: 已保存', word);
-        // 延迟开始获取详细数据，给页面更多时间加载
-        setTimeout(function() {
-          enrichWordData(word);
-        }, 2000);
+        if (chrome.runtime.lastError) {
+          console.error('iciba生词本: 保存本地出错', chrome.runtime.lastError);
+          return;
+        }
+        console.log('iciba生词本: 已保存到本地', word);
+
+        // 立即同步到云端
+        chrome.storage.sync.set({ words: words }, function() {
+          if (chrome.runtime.lastError) {
+            console.error('iciba生词本: 同步云端失败', chrome.runtime.lastError.message);
+          } else {
+            console.log('iciba生词本: 已同步到云端', word);
+          }
+        });
       });
+
+      // 延迟开始获取详细数据，给页面更多时间加载
+      setTimeout(function() {
+        enrichWordData(word);
+      }, 2000);
     });
   }
 
@@ -284,8 +314,17 @@
             definition: data.definition,
             examples: data.examples || []
           };
+          // 同时保存到本地和云端
           chrome.storage.local.set({ words: words }, function() {
-            console.log('iciba生词本: 已更新单词详细数据', targetWord, data.definition);
+            console.log('iciba生词本: 已更新单词详细数据(本地)', targetWord, data.definition);
+            // 同步到云端
+            chrome.storage.sync.set({ words: words }, function() {
+              if (chrome.runtime.lastError) {
+                console.error('iciba生词本: 同步云端失败', chrome.runtime.lastError.message);
+              } else {
+                console.log('iciba生词本: 已更新单词详细数据(云端)', targetWord);
+              }
+            });
           });
         }
       });
