@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     onAuthStateChanged((user) => {
       currentUser = user;
+      console.log('Auth state changed:', user ? 'Logged in as ' + user.email : 'Logged out');
       if (user) {
         userInfo.style.display = 'flex';
         signInPrompt.style.display = 'none';
@@ -194,14 +195,23 @@ document.addEventListener('DOMContentLoaded', function() {
       updateWordCount();
       renderWords(allWords);
 
+      console.log('loadWords - 当前用户:', currentUser ? currentUser.email : '未登录');
+      console.log('loadWords - 本地单词数:', allWords.length);
+      console.log('loadWords - 上次同步时间:', new Date(lastSync).toLocaleString());
+
       if (currentUser) {
+        // 检查是否有新单词需要同步
         const hasNewWords = allWords.some(w => w.timestamp && w.timestamp > lastSync);
+        console.log('loadWords - 是否有新单词:', hasNewWords);
 
         if (hasNewWords) {
+          console.log('loadWords - 开始同步到Firebase...');
           saveWordsToFirebase(allWords).then(() => {
+            console.log('loadWords - 已保存到Firebase');
             chrome.storage.local.set({ lastSync: Date.now() });
             return loadWordsFromFirebase();
           }).then(firebaseWords => {
+            console.log('loadWords - 从Firebase加载了', firebaseWords?.length || 0, '个单词');
             if (firebaseWords && firebaseWords.length > 0) {
               mergeAndSaveWords(firebaseWords);
             }
@@ -209,11 +219,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Sync error:', err);
           });
         } else {
+          console.log('loadWords - 没有新单词，从Firebase加载...');
           loadWordsFromFirebase().then(firebaseWords => {
+            console.log('loadWords - 从Firebase加载了', firebaseWords?.length || 0, '个单词');
             if (firebaseWords && firebaseWords.length > 0) {
               const firebaseHasNewer = firebaseWords.some(w =>
                 !allWords.find(lw => lw.word.toLowerCase() === w.word.toLowerCase())
               );
+              console.log('loadWords - Firebase有更新的单词:', firebaseHasNewer);
               if (firebaseHasNewer) {
                 mergeAndSaveWords(firebaseWords);
               }

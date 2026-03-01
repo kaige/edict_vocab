@@ -211,53 +211,57 @@
   // 尝试补充单词的详细数据
   function enrichWordData(word) {
     let retries = 0;
-    const maxRetries = 60; // 增加重试次数
+    const maxRetries = 60;
     const delay = 500;
 
     function tryEnrich() {
       // 先尝试从 __NEXT_DATA__ 获取
-      let data = extractFromNextData();
+      let nextData = extractFromNextData();
 
-      // 如果没有获取到定义或音标，尝试从DOM获取
-      if (!data.definition && !data.phonetic) {
-        data = extractFromDOM();
-      }
-
-      const wordMatches = data.word && data.word.toLowerCase() === word.toLowerCase();
-      const hasData = data.definition || data.phonetic;
+      // 从DOM获取
+      let domData = extractFromDOM();
 
       const urlWord = getWordFromUrl();
 
-      console.log('iciba生词本: 词汇数据获取尝试', word, {
-        extractedWord: data.word,
+      console.log('iciba生词本: 词汇数据获取', word, {
+        nextDataWord: nextData.word,
+        domDataWord: domData.word,
         urlWord: urlWord,
-        wordMatches: wordMatches,
-        hasDefinition: !!data.definition,
-        hasPhonetic: !!data.phonetic,
+        nextDataDef: !!nextData.definition,
+        domDataDef: !!domData.definition,
         retry: retries
       });
 
-      // 如果提取的单词匹配目标单词，且有数据，保存
-      if (wordMatches && hasData) {
-        saveEnrichedData(word, data);
-        return;
-      }
+      // 优先使用匹配的数据源
+      let dataToUse = null;
 
-      // 如果URL已更新到目标词，且提取到了数据，但单词名不匹配
-      // 这通常意味着页面还在加载旧内容
-      if (urlWord && urlWord.toLowerCase() === word.toLowerCase() && data.word && data.word !== word) {
-        // URL正确但内容还是旧的，继续等待
+      // 检查 __NEXT_DATA__ 是否匹配
+      if (nextData.word && nextData.word.toLowerCase() === word.toLowerCase() && (nextData.definition || nextData.phonetic)) {
+        dataToUse = nextData;
+      }
+      // 检查 DOM 是否匹配
+      else if (domData.word && domData.word.toLowerCase() === word.toLowerCase() && (domData.definition || domData.phonetic)) {
+        dataToUse = domData;
+      }
+      // URL已更新，但数据还不匹配 - 继续等待
+      else if (urlWord && urlWord.toLowerCase() === word.toLowerCase()) {
         if (retries < maxRetries) {
+          console.log('iciba生词本: URL已更新到 ' + urlWord + '，但DOM还是旧内容，继续等待...');
           retries++;
           setTimeout(tryEnrich, delay);
           return;
+        } else {
+          // 超时，使用当前DOM数据（即使不完全匹配）
+          if (domData.definition || domData.phonetic) {
+            dataToUse = domData;
+          } else if (nextData.definition || nextData.phonetic) {
+            dataToUse = nextData;
+          }
         }
       }
 
-      // 如果已达到最大重试次数但仍有数据，尝试保存
-      if (retries >= maxRetries && hasData) {
-        console.log('iciba生词本: 使用提取的数据更新', word);
-        saveEnrichedData(word, data);
+      if (dataToUse) {
+        saveEnrichedData(word, dataToUse);
         return;
       }
 
