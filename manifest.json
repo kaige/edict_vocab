@@ -36,6 +36,6 @@
     "128": "icon.png"
   },
   "content_security_policy": {
-    "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-src 'self' https://www.gstatic.com https://apis.google.com; connect-src 'self' https://www.gstatic.com https://apis.google.com https://firebaseio.com https://firebaseapp.com https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com; worker-src 'self' blob:; child-src 'self'; object-src 'self' blob:; style-src 'self' 'unsafe-inline';"
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src 'self' https://www.gstatic.com https://apis.google.com; connect-src 'self' https://www.gstatic.com https://apis.google.com https://firebaseio.com https://firebaseapp.com https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https: https://blob: https://data:;"
   }
 }
