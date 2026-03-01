@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize Firebase
   initFirebase().then(() => {
     console.log('Firebase initialized');
+    console.log('Current CSP:', chrome.runtime.getManifest().content_security_policy);
 
     onAuthStateChanged((user) => {
       currentUser = user;
