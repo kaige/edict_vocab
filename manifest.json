@@ -34,8 +34,5 @@
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; frame-src 'self' https://www.gstatic.com https://apis.google.com; connect-src 'self' https://www.gstatic.com https://apis.google.com https://firebaseio.com https://firebaseapp.com https://*.firebaseio.com https://*.firebaseapp.com https://*.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https: https://blob: https://data:;"
   }
 }
