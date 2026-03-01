@@ -14,7 +14,7 @@
     {
       "matches": ["*://*.iciba.com/*"],
       "js": ["content.js"],
-      "run_at": "document_end"
+      "run_at": "document_idle"
     }
   ],
   "action": {

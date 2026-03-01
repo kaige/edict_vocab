@@ -347,18 +347,9 @@
     if (searchInput) {
       console.log('iciba生词本: 找到搜索输入框', searchInput);
 
-      // 监听键盘事件 - Enter键
-      searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          const newWord = searchInput.value.trim();
-          console.log('iciba生词本: 检测到Enter键搜索，输入的词:', newWord);
-
-          if (newWord && newWord.length >= 2) {
-            // 直接保存用户输入的单词
-            saveWord(newWord);
-          }
-        }
-      });
+      // 移除旧的监听器（避免重复）
+      searchInput.removeEventListener('keydown', handleSearchKeydown);
+      searchInput.addEventListener('keydown', handleSearchKeydown);
 
       // 监听搜索按钮点击
       const searchBtn = document.querySelector('[class*="Search_btn"]') ||
@@ -366,24 +357,70 @@
                         document.querySelector('button[class*="search"]');
       if (searchBtn) {
         console.log('iciba生词本: 找到搜索按钮', searchBtn);
-        searchBtn.addEventListener('click', function() {
-          const newWord = searchInput.value.trim();
-          if (newWord && newWord.length >= 2) {
-            saveWord(newWord);
-          }
-        });
+        searchBtn.removeEventListener('click', handleSearchClick);
+        searchBtn.addEventListener('click', handleSearchClick);
       }
-    } else {
-      console.log('iciba生词本: 未找到搜索输入框');
+      return true;
     }
+    return false;
+  }
+
+  // 处理搜索按键
+  function handleSearchKeydown(e) {
+    if (e.key === 'Enter') {
+      const searchInput = e.target;
+      const newWord = searchInput.value.trim();
+      console.log('iciba生词本: 检测到Enter键搜索，输入的词:', newWord);
+
+      if (newWord && newWord.length >= 2) {
+        saveWord(newWord);
+      }
+    }
+  }
+
+  // 处理搜索按钮点击
+  function handleSearchClick(e) {
+    const searchInput = document.querySelector('input[type="search"]') ||
+                        document.querySelector('input[placeholder*="搜"]') ||
+                        document.querySelector('input[placeholder*="查"]') ||
+                        document.querySelector('input[class*="search"]') ||
+                        document.querySelector('input[class*="input"]') ||
+                        document.querySelector('input[class*="Search_input"]') ||
+                        document.querySelector('#input');
+    if (searchInput) {
+      const newWord = searchInput.value.trim();
+      if (newWord && newWord.length >= 2) {
+        saveWord(newWord);
+      }
+    }
+  }
+
+  // 等待搜索输入框出现（用于SPA页面）
+  function waitForSearchInput(maxAttempts = 20) {
+    let attempts = 0;
+
+    function trySetup() {
+      if (setupSearchListener()) {
+        return; // 成功找到
+      }
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(trySetup, 500);
+      } else {
+        console.log('iciba生词本: 超时等待搜索输入框');
+      }
+    }
+
+    trySetup();
   }
 
   // 初始化
   function init() {
     console.log('iciba生词本: 插件已加载');
 
-    // 设置搜索监听
-    setupSearchListener();
+    // 等待搜索输入框出现后设置监听
+    waitForSearchInput();
   }
 
   // 启动
