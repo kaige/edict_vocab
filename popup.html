@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iciba生词本</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📚 iciba生词本</h1>
+      <span id="wordCount" class="word-count">0 个单词</span>
+    </header>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-input" placeholder="搜索单词...">
+      <button id="exportBtn" class="btn btn-secondary">导出</button>
+      <button id="clearAllBtn" class="btn btn-danger">清空</button>
+    </div>
+
+    <div id="wordList" class="word-list">
+      <div class="empty-state">暂无生词，去查几个单词吧！</div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

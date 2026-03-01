@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "iciba生词本",
+  "version": "1.0",
+  "description": "在iciba.com查词时自动保存生词到生词本",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.iciba.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.iciba.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
