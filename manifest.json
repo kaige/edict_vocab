@@ -34,5 +34,8 @@
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://www.gstatic.com https://apis.google.com; object-src 'self'"
   }
 }
