@@ -12,26 +12,51 @@ document.addEventListener('DOMContentLoaded', function() {
   let allWords = [];
   let isSyncing = false;
 
-  // 加载生词 - 优先从云端加载，如果没有则从本地加载
+  // 加载生词 - 同时从云端和本地加载，合并去重后使用
   function loadWords() {
     chrome.storage.sync.get({ words: [] }, function(syncResult) {
-      const syncWords = syncResult.words || [];
+      chrome.storage.local.get({ words: [] }, function(localResult) {
+        const syncWords = syncResult.words || [];
+        const localWords = localResult.words || [];
 
-      if (syncWords.length > 0) {
-        // 云端有数据，使用云端数据
-        allWords = syncWords;
+        console.log('iciba生词本: 云端', syncWords.length, '个单词, 本地', localWords.length, '个单词');
+
+        // 合并两个列表，使用时间戳最新的版本
+        const mergedMap = new Map();
+
+        // 先添加本地的
+        localWords.forEach(word => {
+          mergedMap.set(word.word.toLowerCase(), word);
+        });
+
+        // 再添加云端的，如果时间戳更新则覆盖
+        syncWords.forEach(word => {
+          const key = word.word.toLowerCase();
+          const existing = mergedMap.get(key);
+          if (!existing || (word.timestamp && word.timestamp > (existing.timestamp || 0))) {
+            mergedMap.set(key, word);
+          }
+        });
+
+        // 转换为数组并按时间戳排序
+        allWords = Array.from(mergedMap.values()).sort((a, b) => {
+          return (b.timestamp || 0) - (a.timestamp || 0);
+        });
+
         updateWordCount();
         renderWords(allWords);
-        console.log('iciba生词本: 从云端加载了', allWords.length, '个单词');
-      } else {
-        // 云端无数据，从本地加载
-        chrome.storage.local.get({ words: [] }, function(localResult) {
-          allWords = localResult.words || [];
-          updateWordCount();
-          renderWords(allWords);
-          console.log('iciba生词本: 从本地加载了', allWords.length, '个单词');
-        });
-      }
+        console.log('iciba生词本: 合并后共', allWords.length, '个单词');
+
+        // 如果合并后的数据与云端不一致，同步到云端
+        if (allWords.length > syncWords.length) {
+          console.log('iciba生词本: 检测到本地有更多数据，同步到云端');
+          chrome.storage.sync.set({ words: allWords }, function() {
+            if (chrome.runtime.lastError) {
+              console.error('iciba生词本: 同步失败', chrome.runtime.lastError.message);
+            }
+          });
+        }
+      });
     });
   }
 

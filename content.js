@@ -187,18 +187,36 @@
 
     console.log('iciba生词本: 正在保存单词', word);
 
-    // 先从云端读取现有单词，确保跨设备同步正确
+    // 同时从云端和本地读取，合并后再保存，避免覆盖其他设备的数据
     chrome.storage.sync.get({ words: [] }, function(syncResult) {
-      if (chrome.runtime.lastError) {
-        console.error('iciba生词本: 读取云端存储出错，回退到本地', chrome.runtime.lastError);
-        // 如果云端读取失败，回退到本地读取
-        chrome.storage.local.get({ words: [] }, function(localResult) {
-          handleWords(localResult);
-        });
-        return;
-      }
+      chrome.storage.local.get({ words: [] }, function(localResult) {
+        const syncWords = syncResult.words || [];
+        const localWords = localResult.words || [];
 
-      handleWords(syncResult);
+        console.log('iciba生词本: 准备保存前，云端', syncWords.length, '个，本地', localWords.length, '个');
+
+        // 合并两个列表，去重
+        const mergedMap = new Map();
+
+        // 先添加本地的
+        localWords.forEach(w => {
+          mergedMap.set(w.word.toLowerCase(), w);
+        });
+
+        // 再添加云端的，如果时间戳更新则覆盖
+        syncWords.forEach(w => {
+          const key = w.word.toLowerCase();
+          const existing = mergedMap.get(key);
+          if (!existing || (w.timestamp && w.timestamp > (existing.timestamp || 0))) {
+            mergedMap.set(key, w);
+          }
+        });
+
+        // 转换为数组
+        const mergedWords = Array.from(mergedMap.values());
+
+        handleWords({ words: mergedWords });
+      });
     });
 
     function handleWords(result) {
@@ -312,24 +330,30 @@
     }
 
     function saveEnrichedData(targetWord, data) {
-      // 先从云端读取，确保获取最新的数据
+      // 同时从云端和本地读取，合并后再更新
       chrome.storage.sync.get({ words: [] }, function(syncResult) {
-        if (chrome.runtime.lastError) {
-          console.error('iciba生词本: 读取云端存储出错，回退到本地', chrome.runtime.lastError);
-          chrome.storage.local.get({ words: [] }, function(localResult) {
-            updateAndSave(localResult);
-          });
-          return;
-        }
+        chrome.storage.local.get({ words: [] }, function(localResult) {
+          const syncWords = syncResult.words || [];
+          const localWords = localResult.words || [];
 
-        // 如果云端为空，回退到本地
-        if (!syncResult.words || syncResult.words.length === 0) {
-          chrome.storage.local.get({ words: [] }, function(localResult) {
-            updateAndSave(localResult);
+          // 合并两个列表
+          const mergedMap = new Map();
+
+          localWords.forEach(w => {
+            mergedMap.set(w.word.toLowerCase(), w);
           });
-        } else {
-          updateAndSave(syncResult);
-        }
+
+          syncWords.forEach(w => {
+            const key = w.word.toLowerCase();
+            const existing = mergedMap.get(key);
+            if (!existing || (w.timestamp && w.timestamp > (existing.timestamp || 0))) {
+              mergedMap.set(key, w);
+            }
+          });
+
+          const mergedWords = Array.from(mergedMap.values());
+          updateAndSave({ words: mergedWords });
+        });
       });
 
       function updateAndSave(result) {
