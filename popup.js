@@ -154,7 +154,19 @@ document.addEventListener('DOMContentLoaded', function() {
     renderWords(filtered);
   });
 
-  // 同步按钮
+  // 同步按钮 - 长按显示调试信息
+  let pressTimer = null;
+  syncBtn.addEventListener('mousedown', function() {
+    pressTimer = setTimeout(function() {
+      showDebugInfo();
+    }, 1000);
+  });
+  syncBtn.addEventListener('mouseup', function() {
+    clearTimeout(pressTimer);
+  });
+  syncBtn.addEventListener('mouseleave', function() {
+    clearTimeout(pressTimer);
+  });
   syncBtn.addEventListener('click', function() {
     if (isSyncing) return;
     manualSync(allWords);
@@ -192,6 +204,37 @@ document.addEventListener('DOMContentLoaded', function() {
         syncStatusEl.style.display = 'none';
       }, duration);
     }
+  }
+
+  // 显示调试信息 - 长按同步按钮触发
+  function showDebugInfo() {
+    chrome.storage.sync.get(null, function(syncData) {
+      chrome.storage.local.get(null, function(localData) {
+        const syncWords = (syncData.words || []).length;
+        const localWords = (localData.words || []).length;
+        const syncBytes = JSON.stringify(syncData).length;
+        const localBytes = JSON.stringify(localData).length;
+
+        const debugInfo = `
+=== iciba生词本 调试信息 ===
+云端存储: ${syncWords} 个单词 (${syncBytes} 字节)
+本地存储: ${localWords} 个单词 (${localBytes} 字节)
+
+云端数据:
+  ${syncData.words ? JSON.stringify(syncData.words, null, 2) : '无数据'}
+
+本地数据:
+  ${localData.words ? JSON.stringify(localData.words, null, 2) : '无数据'}
+        `;
+
+        console.log(debugInfo);
+        alert(debugInfo);
+
+        if (syncWords === 0 && localWords > 0) {
+          alert('⚠️ 检测到本地有数据但云端为空！\n\n可能原因：\n1. Chrome同步未开启\n2. 网络问题导致同步失败\n3. 超出存储配额\n\n建议：点击同步按钮手动同步');
+        }
+      });
+    });
   }
 
   // HTML转义
