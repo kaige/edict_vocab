@@ -245,14 +245,27 @@
           console.error('iciba生词本: 保存本地出错', chrome.runtime.lastError);
           return;
         }
-        console.log('iciba生词本: 已保存到本地', word);
+        console.log('iciba生词本: 已保存到本地', word, '(共', words.length, '个单词)');
 
         // 立即同步到云端
         chrome.storage.sync.set({ words: words }, function() {
           if (chrome.runtime.lastError) {
             console.error('iciba生词本: 同步云端失败', chrome.runtime.lastError.message);
+            console.error('iciba生词本: 错误详情', chrome.runtime.lastError);
+
+            // 检查是否是配额问题
+            chrome.storage.sync.getBytesInUse('words', function(bytes) {
+              console.log('iciba生词本: 当前云端存储使用:', bytes, '字节');
+              console.log('iciba生词本: 云端存储限制: QUOTA_BYTES =', chrome.storage.sync.QUOTA_BYTES);
+              console.log('iciba生词本: 单项限制: QUOTA_BYTES_PER_ITEM =', chrome.storage.sync.QUOTA_BYTES_PER_ITEM);
+            });
           } else {
-            console.log('iciba生词本: 已同步到云端', word);
+            console.log('iciba生词本: 已同步到云端', word, '(共', words.length, '个单词)');
+
+            // 验证同步是否成功
+            chrome.storage.sync.get({ words: [] }, function(result) {
+              console.log('iciba生词本: 验证云端数据，实际存储了', (result.words || []).length, '个单词');
+            });
           }
         });
       });
@@ -372,7 +385,7 @@
             // 同步到云端
             chrome.storage.sync.set({ words: words }, function() {
               if (chrome.runtime.lastError) {
-                console.error('iciba生词本: 同步云端失败', chrome.runtime.lastError.message);
+                console.error('iciba生词本: 更新后同步云端失败', chrome.runtime.lastError.message);
               } else {
                 console.log('iciba生词本: 已更新单词详细数据(云端)', targetWord);
               }

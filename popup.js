@@ -14,12 +14,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 加载生词 - 同时从云端和本地加载，合并去重后使用
   function loadWords() {
+    console.log('iciba生词本: 开始加载单词...');
+
     chrome.storage.sync.get({ words: [] }, function(syncResult) {
+      if (chrome.runtime.lastError) {
+        console.error('iciba生词本: 读取云端存储失败', chrome.runtime.lastError);
+        showSyncStatus('⚠️ 云端读取失败: ' + chrome.runtime.lastError.message, 5000);
+      }
+
       chrome.storage.local.get({ words: [] }, function(localResult) {
+        if (chrome.runtime.lastError) {
+          console.error('iciba生词本: 读取本地存储失败', chrome.runtime.lastError);
+        }
+
         const syncWords = syncResult.words || [];
         const localWords = localResult.words || [];
 
         console.log('iciba生词本: 云端', syncWords.length, '个单词, 本地', localWords.length, '个单词');
+
+        // 显示前3个单词用于调试
+        if (syncWords.length > 0) {
+          console.log('iciba生词本: 云端前3个单词:', syncWords.slice(0, 3).map(w => w.word));
+        }
+        if (localWords.length > 0) {
+          console.log('iciba生词本: 本地前3个单词:', localWords.slice(0, 3).map(w => w.word));
+        }
 
         // 合并两个列表，使用时间戳最新的版本
         const mergedMap = new Map();
@@ -53,6 +72,10 @@ document.addEventListener('DOMContentLoaded', function() {
           chrome.storage.sync.set({ words: allWords }, function() {
             if (chrome.runtime.lastError) {
               console.error('iciba生词本: 同步失败', chrome.runtime.lastError.message);
+              showSyncStatus('⚠️ 同步失败: ' + chrome.runtime.lastError.message, 5000);
+            } else {
+              console.log('iciba生词本: 自动同步成功');
+              showSyncStatus('✓ 已自动同步到云端', 2000);
             }
           });
         }
