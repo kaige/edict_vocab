@@ -7,7 +7,11 @@
       "Bash(git remote add:*)",
       "Bash(git push:*)",
       "Bash(curl:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(powershell:*)",
+      "Bash(magick:*)",
+      "Bash(copy:*)",
+      "Bash(node:*)"
     ]
   }
 }
