@@ -187,13 +187,21 @@
 
     console.log('iciba生词本: 正在保存单词', word);
 
-    chrome.storage.local.get({ words: [] }, function(result) {
-      // 检查是否出现错误
+    // 先从云端读取现有单词，确保跨设备同步正确
+    chrome.storage.sync.get({ words: [] }, function(syncResult) {
       if (chrome.runtime.lastError) {
-        console.error('iciba生词本: 读取存储出错', chrome.runtime.lastError);
+        console.error('iciba生词本: 读取云端存储出错，回退到本地', chrome.runtime.lastError);
+        // 如果云端读取失败，回退到本地读取
+        chrome.storage.local.get({ words: [] }, function(localResult) {
+          handleWords(localResult);
+        });
         return;
       }
 
+      handleWords(syncResult);
+    });
+
+    function handleWords(result) {
       const words = result.words || [];
       console.log('iciba生词本: 当前已有', words.length, '个单词');
 
@@ -235,7 +243,7 @@
       setTimeout(function() {
         enrichWordData(word);
       }, 2000);
-    });
+    }
   }
 
   // 尝试补充单词的详细数据
@@ -304,7 +312,27 @@
     }
 
     function saveEnrichedData(targetWord, data) {
-      chrome.storage.local.get({ words: [] }, function(result) {
+      // 先从云端读取，确保获取最新的数据
+      chrome.storage.sync.get({ words: [] }, function(syncResult) {
+        if (chrome.runtime.lastError) {
+          console.error('iciba生词本: 读取云端存储出错，回退到本地', chrome.runtime.lastError);
+          chrome.storage.local.get({ words: [] }, function(localResult) {
+            updateAndSave(localResult);
+          });
+          return;
+        }
+
+        // 如果云端为空，回退到本地
+        if (!syncResult.words || syncResult.words.length === 0) {
+          chrome.storage.local.get({ words: [] }, function(localResult) {
+            updateAndSave(localResult);
+          });
+        } else {
+          updateAndSave(syncResult);
+        }
+      });
+
+      function updateAndSave(result) {
         const words = result.words || [];
         const index = words.findIndex(w => w.word.toLowerCase() === targetWord.toLowerCase());
         if (index !== -1) {
@@ -327,7 +355,7 @@
             });
           });
         }
-      });
+      }
     }
 
     tryEnrich();
